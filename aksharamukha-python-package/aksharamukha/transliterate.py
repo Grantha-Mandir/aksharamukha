@@ -1,10 +1,13 @@
 import re
+import os
+from zipfile import ZipFile
+import xml.etree.ElementTree as ET
 from . import Convert,PostOptions,PostProcess,PreProcess
 from . import ConvertFix
-import json
 import requests
 import html
 import itertools
+import json
 from collections import Counter
 import unicodedata
 import io
@@ -261,6 +264,130 @@ def process(src, tgt, txt, nativize = True, post_options = [], pre_options = [])
         pre_options = detect_preoptions(txt, src)
 
     return convert(src, tgt, txt, nativize, pre_options, post_options)
+
+
+def convert_docx(src, tgt, txt, nativize, pre_options, post_options):
+
+    # ZipFile(r'C:\Users\ubaid\PycharmProjects\test_roman_IAST_to_devanagari_input.docx').extractall(".")
+
+    ZipFile(txt).extractall(".")
+    xml_files_in_word = os.listdir("./word")
+    xml_files_in_word_rels = os.listdir("./word/_rels")
+    xml_files_in_rels = os.listdir("./_rels")
+    xml_files_in_docProps = os.listdir("./docProps")
+    # xml_files_in_temp = os.listdir("./temp")
+    xml_files_to_convert = []
+
+    # for file in xml_files_in_temp:
+    #     if file.endswith('.xml'):
+
+    #         file = "./temp/"+str(file)
+    #         xml_files_to_convert.append(file)
+
+    xml_files_to_convert.append(str('./[Content_Types].xml'))
+    for file in xml_files_in_rels:
+
+        file = "./_rels/" +str(file)
+        xml_files_to_convert.append(file)
+    
+    for file in xml_files_in_docProps:
+
+        file = "./docProps/" +str(file)
+        xml_files_to_convert.append(file)
+
+    for file in xml_files_in_word:
+        if file.endswith('.xml'):
+
+
+            file = "./word/" +str(file)
+            xml_files_to_convert.append(file)
+
+    for file in xml_files_in_word_rels:
+
+        file = "./word/_rels/" +str(file)
+        xml_files_to_convert.append(file)
+
+
+
+    print(xml_files_to_convert)
+
+    tree = ET.parse(r'./word/document.xml')
+
+    tree_header = ET.parse(r'./word/header1.xml')
+
+    tree_foot = ET.parse(r'./word/footer1.xml')
+
+    tree_fontTable = ET.parse(r'./word/fontTable.xml')
+
+    root = tree.getroot()
+
+    root_header = tree_header.getroot()
+
+    root_foot = tree_foot.getroot()
+
+    root_fontTable = tree_fontTable.getroot()
+
+
+    
+    for (data_header,data,data_fontTable,data_foot) in zip(root_header.iter(),root.iter(),root_fontTable.iter(),root_foot.iter()):
+
+        if data_header.text:
+            data_header.text = convert(src, tgt, data_header.text, nativize, post_options, pre_options)
+        
+        if data.text:
+            data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
+
+        if data_foot.text:
+            data_foot.text = convert(src, tgt, data_foot.text, nativize, post_options, pre_options)
+
+        if data_fontTable.text:
+            data_fontTable.text = convert(src, tgt, data_fontTable.text, nativize, post_options, pre_options)
+
+    for data in root_header.iter():
+        if data.text:
+            data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
+
+    tree_header.write('./word/header1.xml')
+
+    for data in root.iter():
+
+        if data.text:
+            data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
+
+    tree.write('./word/document.xml')
+
+    tree_fontTable.write('./word/fontTable.xml')
+
+    for data in root_foot.iter():
+
+        if data.text:
+            data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
+
+    tree_foot.write('./word/footer1.xml')
+
+    # file_paths = ["./[Content_Types].xml",
+    #               "./_rels/.rels",
+    #               "./docProps/app.xml",
+    #               "./docProps/core.xml",
+    #               "./word/document.xml",
+    #               "./word/header1.xml",
+    #               "./word/numbering.xml",
+    #               "./word/footer1.xml",
+    #               "./word/styles.xml",
+    #               "./word/settings.xml",
+    #               "./word/fontTable.xml",
+    #               "./word/_rels/document.xml.rels"]
+
+    # printing the list of all files to be zipped
+    # print('Following files will be zipped:')
+    # for file_name in file_paths:
+    #     print(file_name)
+
+    # writing files to a zipfile
+    with ZipFile('enthuons.docx', 'w') as zipf:
+        # writing each file one by one
+        for file in xml_files_to_convert:
+            zipf.write(file)
 
 
 
