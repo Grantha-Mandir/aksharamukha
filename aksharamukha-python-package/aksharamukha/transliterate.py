@@ -309,61 +309,105 @@ def convert_docx(src, tgt, txt, nativize, pre_options, post_options):
 
 
 
-    print(xml_files_to_convert)
+    # print(xml_files_to_convert)
 
-    tree = ET.parse(r'./word/document.xml')
 
-    tree_header = ET.parse(r'./word/header1.xml')
+    for file in xml_files_to_convert:
 
-    tree_foot = ET.parse(r'./word/footer1.xml')
+        if "word" in file and file.endswith('.xml'):
 
-    tree_fontTable = ET.parse(r'./word/fontTable.xml')
+            tree = ET.parse(file)
 
-    root = tree.getroot()
+            root = tree.getroot()
 
-    root_header = tree_header.getroot()
+            for data in root.iter():
+                if data.text:
+                    data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
+    
+            tree.write(file)
 
-    root_foot = tree_foot.getroot()
 
-    root_fontTable = tree_fontTable.getroot()
+
+
+
+
+            
+    # if './word/header1.xml' in xml_files_to_convert:
+        
+    #     tree_header = ET.parse(r'./word/header1.xml')
+
+    #     root_header = tree_header.getroot()
+
+    #     for data in root_header.iter():
+    #         if data.text:
+    #             data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
+    
+    #     tree_header.write('./word/header1.xml')
+    
+
+    # if './word/header2.xml' in xml_files_to_convert:
+        
+    #     tree_header2 = ET.parse(r'./word/header2.xml')
+
+    #     root_header2 = tree_header2.getroot()
+
+    #     for data in root_header2.iter():
+    #         if data.text:
+    #             data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
+    
+    #     tree_header2.write('./word/header2.xml')
+
+
+
+    # tree = ET.parse(r'./word/document.xml')
+
+    
+
+    # tree_foot = ET.parse(r'./word/footer1.xml')
+
+    # tree_fontTable = ET.parse(r'./word/fontTable.xml')
+
+    # root = tree.getroot()
+
+    
+
+    # root_foot = tree_foot.getroot()
+
+    # root_fontTable = tree_fontTable.getroot()
 
 
     
-    for (data_header,data,data_fontTable,data_foot) in zip(root_header.iter(),root.iter(),root_fontTable.iter(),root_foot.iter()):
+    # for (data_header,data,data_fontTable,data_foot) in zip(root_header.iter(),root.iter(),root_fontTable.iter(),root_foot.iter()):
 
-        if data_header.text:
-            data_header.text = convert(src, tgt, data_header.text, nativize, post_options, pre_options)
+    #     if data_header.text:
+    #         data_header.text = convert(src, tgt, data_header.text, nativize, post_options, pre_options)
         
-        if data.text:
-            data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
+    #     if data.text:
+    #         data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
 
-        if data_foot.text:
-            data_foot.text = convert(src, tgt, data_foot.text, nativize, post_options, pre_options)
+    #     if data_foot.text:
+    #         data_foot.text = convert(src, tgt, data_foot.text, nativize, post_options, pre_options)
 
-        if data_fontTable.text:
-            data_fontTable.text = convert(src, tgt, data_fontTable.text, nativize, post_options, pre_options)
+    #     if data_fontTable.text:
+    #         data_fontTable.text = convert(src, tgt, data_fontTable.text, nativize, post_options, pre_options)
 
-    for data in root_header.iter():
-        if data.text:
-            data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
+    
 
-    tree_header.write('./word/header1.xml')
+    # for data in root.iter():
 
-    for data in root.iter():
+    #     if data.text:
+    #         data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
 
-        if data.text:
-            data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
+    # tree.write('./word/document.xml')
 
-    tree.write('./word/document.xml')
+    # tree_fontTable.write('./word/fontTable.xml')
 
-    tree_fontTable.write('./word/fontTable.xml')
+    # for data in root_foot.iter():
 
-    for data in root_foot.iter():
+    #     if data.text:
+    #         data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
 
-        if data.text:
-            data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
-
-    tree_foot.write('./word/footer1.xml')
+    # tree_foot.write('./word/footer1.xml')
 
     # file_paths = ["./[Content_Types].xml",
     #               "./_rels/.rels",
