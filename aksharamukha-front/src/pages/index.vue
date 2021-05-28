@@ -137,7 +137,8 @@ import ClipboardJS from 'clipboard'
 var clipboard = new ClipboardJS('.btn2')
 console.log(clipboard)
 
-import keys from '../keys.js'
+var keys = {}
+keys['api_key'] = ''
 
 var _ = require('underscore')
 const isOnline = require('is-online')
@@ -359,6 +360,9 @@ export default {
       }
 
       // console.log(data)
+
+      keys = {}
+      keys['api_key'] = ''
 
       // console.log('Sending Results')
       var result = await this.getResultPost('https://vision.googleapis.com/v1/images:annotate?key=' + keys.api_key, data)

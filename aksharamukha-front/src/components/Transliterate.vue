@@ -52,6 +52,7 @@ export default {
     }
   },
   methods: {
+
     convert: function () {
       if (this.text === '' || this.text === '. . .') {
         this.convertText = this.text
