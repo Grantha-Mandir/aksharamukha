@@ -137,7 +137,9 @@ import ClipboardJS from 'clipboard'
 var clipboard = new ClipboardJS('.btn2')
 console.log(clipboard)
 
-import keys from '../keys.js'
+// import keys from '../keys.js'
+var keys = {}
+keys['api_key'] = ''
 
 var _ = require('underscore')
 const isOnline = require('is-online')
