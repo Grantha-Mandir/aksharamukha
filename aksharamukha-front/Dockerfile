@@ -2,7 +2,8 @@
 FROM node:13.14-alpine as build-stage
 
 WORKDIR /app
-COPY ./aksharamukha-front/ .
+
+COPY ./aksharamukha-front/. .
 
 RUN npm install -g @quasar/cli
 
@@ -17,3 +18,5 @@ COPY --from=build-stage /app/dist/spa-mat /usr/share/nginx/html
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
+
+

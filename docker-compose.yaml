@@ -5,22 +5,25 @@ services:
       context: .
       dockerfile: ./aksharamukha-front/Dockerfile
     image: aksharamukha-front
-    #image: virtualvinodh/aksharamukha-front
     ports:
       - "12345:80"
+    environment: 
+      BACKEND_HOST: '192.168.33.12'
   back:
     build:
       context: .
       dockerfile: ./aksharamukha-back/Dockerfile
     image: aksharamukha-back
-    #image: virtualvinodh/aksharamukha-back
+    volumes:
+        - ./aksharamukha-back:/usr/backend/
     ports:
       - "8085:8085"
   fonts:
-    # build:
-    #   context: .
-    #   dockerfile: ./aksharamukha-fonts/Dockerfile
-    # image: aksharamukha-fonts
-    image: virtualvinodh/aksharamukha-fonts
+    build:
+      context: .
+      dockerfile: ./aksharamukha-fonts/Dockerfile
+    image: aksharamukha-fonts
+    volumes:
+        - ./aksharamukha-fonts:/usr/local/apache2/htdocs/
     ports:
       - "9899:80"
