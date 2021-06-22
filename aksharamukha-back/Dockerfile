@@ -6,7 +6,7 @@ RUN pip install --upgrade pip
 RUN pip3 install gunicorn
 
 # Copy python files
-ADD . / /usr/backend/
+ADD ./aksharamukha-back/ /usr/backend/
 
 # install requirements
 WORKDIR /usr/backend/

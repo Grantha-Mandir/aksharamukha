@@ -15,6 +15,25 @@ Harvard-Kyoto, ITRANS, Velthuis, IAST, IAST (Pāḷi), ISO, Titus, Roman (Readab
 ## Docker
 You can use the docker-compose.yaml file to orchestrate the containers. It will start the necessary containers for the frontend/backend and, also, bind the webapp to localhost:12345. This would be easiest way to run the app locally.
 
+There is a docker configuration for both development (docker-compose-dev.yaml) as well as production (docker-compose.yaml).
+
+### Development with Docker
+
+Set up the dev environment:
+`docker-compose -f docker-compose-dev.yaml up -d`
+
+Changes in the frontend are effective immediately. Just refresh the web page.
+
+To make changes in the backend effective:
+`docker container restart aksharamukha_back_1`
+
+
+After adding additional npm packages a build is necessary:
+`docker-compose build --no-cache`
+
+Then, start the development environment again:
+`docker-compose -f docker-compose-dev.yaml up -d`
+
 ## Front End
 The front end is written using Quasar and Vue. Use _npm install_ to install all the dependencies and then use _quasar dev_ to start the front end. Also, please point the api to localhost at mixins/ScriptMixin.js.
 

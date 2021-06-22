@@ -2,7 +2,7 @@
 FROM httpd:alpine
 
 # Copy Quasar src files
-ADD . / /usr/local/apache2/htdocs/
+ADD ./aksharamukha-fonts/ /usr/local/apache2/htdocs/
 
 RUN sed -i '/LoadModule rewrite_module/s/^#//g' /usr/local/apache2/conf/httpd.conf
 RUN sed -i '/LoadModule headers_module/s/^#//g' /usr/local/apache2/conf/httpd.conf

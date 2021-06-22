@@ -1,17 +1,24 @@
-version: '3'
+version: '3.7'
 services:
   front:
     build:
       context: .
+      target: build-stage
       dockerfile: ./aksharamukha-front/Dockerfile
     image: aksharamukha-front
     ports:
       - "12345:80"
+    volumes:
+    - './aksharamukha-front:/app'
+    - /app/node_modules/
+    command: /bin/sh -c "quasar dev"
   back:
     build:
       context: .
       dockerfile: ./aksharamukha-back/Dockerfile
     image: aksharamukha-back
+    volumes:
+        - ./aksharamukha-back:/usr/backend/
     ports:
       - "8085:8085"
   fonts:
@@ -19,5 +26,7 @@ services:
       context: .
       dockerfile: ./aksharamukha-fonts/Dockerfile
     image: aksharamukha-fonts
+    volumes:
+        - ./aksharamukha-fonts:/usr/local/apache2/htdocs/
     ports:
       - "9899:80"
