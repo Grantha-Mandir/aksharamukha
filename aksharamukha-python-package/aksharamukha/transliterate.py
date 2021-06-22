@@ -278,13 +278,10 @@ def convert_docx(src, tgt, txt, nativize, pre_options, post_options):
     # xml_files_in_temp = os.listdir("./temp")
     xml_files_to_convert = []
 
-    # for file in xml_files_in_temp:
-    #     if file.endswith('.xml'):
 
-    #         file = "./temp/"+str(file)
-    #         xml_files_to_convert.append(file)
 
     xml_files_to_convert.append(str('./[Content_Types].xml'))
+
     for file in xml_files_in_rels:
 
         file = "./_rels/" +str(file)
@@ -309,82 +306,33 @@ def convert_docx(src, tgt, txt, nativize, pre_options, post_options):
 
 
 
-    print(xml_files_to_convert)
-
-    tree = ET.parse(r'./word/document.xml')
-
-    tree_header = ET.parse(r'./word/header1.xml')
-
-    tree_foot = ET.parse(r'./word/footer1.xml')
-
-    tree_fontTable = ET.parse(r'./word/fontTable.xml')
-
-    root = tree.getroot()
-
-    root_header = tree_header.getroot()
-
-    root_foot = tree_foot.getroot()
-
-    root_fontTable = tree_fontTable.getroot()
-
-
     
-    for (data_header,data,data_fontTable,data_foot) in zip(root_header.iter(),root.iter(),root_fontTable.iter(),root_foot.iter()):
 
-        if data_header.text:
-            data_header.text = convert(src, tgt, data_header.text, nativize, post_options, pre_options)
-        
-        if data.text:
-            data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
 
-        if data_foot.text:
-            data_foot.text = convert(src, tgt, data_foot.text, nativize, post_options, pre_options)
+    for file in xml_files_to_convert:
 
-        if data_fontTable.text:
-            data_fontTable.text = convert(src, tgt, data_fontTable.text, nativize, post_options, pre_options)
+        if "word" in file and file.endswith('.xml'):
 
-    for data in root_header.iter():
-        if data.text:
-            data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
+            tree = ET.parse(file)
 
-    tree_header.write('./word/header1.xml')
+            root = tree.getroot()
 
-    for data in root.iter():
+            for data in root.iter():
+                if data.text:
+                    data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
+    
+            tree.write(file)
 
-        if data.text:
-            data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
 
-    tree.write('./word/document.xml')
 
-    tree_fontTable.write('./word/fontTable.xml')
 
-    for data in root_foot.iter():
 
-        if data.text:
-            data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
 
-    tree_foot.write('./word/footer1.xml')
-
-    # file_paths = ["./[Content_Types].xml",
-    #               "./_rels/.rels",
-    #               "./docProps/app.xml",
-    #               "./docProps/core.xml",
-    #               "./word/document.xml",
-    #               "./word/header1.xml",
-    #               "./word/numbering.xml",
-    #               "./word/footer1.xml",
-    #               "./word/styles.xml",
-    #               "./word/settings.xml",
-    #               "./word/fontTable.xml",
-    #               "./word/_rels/document.xml.rels"]
-
-    # printing the list of all files to be zipped
-    # print('Following files will be zipped:')
-    # for file_name in file_paths:
-    #     print(file_name)
+            
+    
 
     # writing files to a zipfile
-    with ZipFile('enthuons.docx', 'w') as zipf:
+    with ZipFile(str(src)+' to '+str(tgt)+'_'+str(txt)+'_output', 'w') as zipf:
         # writing each file one by one
         for file in xml_files_to_convert:
             zipf.write(file)

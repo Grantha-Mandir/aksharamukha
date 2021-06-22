@@ -9,8 +9,9 @@ import itertools
 from collections import Counter
 import unicodedata
 import io
+import shutil
 
-from aksharamukha.transliterate import convert, unique_everseen, removeA, auto_detect, detect_preoptions
+from aksharamukha.transliterate import convert, unique_everseen, removeA, auto_detect, detect_preoptions, convert_docx
 
 app = Flask(__name__)
 CORS(app)
@@ -443,6 +444,30 @@ def convert_plugin():
 
     return text
 
+@app.route('/api/catch_docx', methods=['POST', 'GET'])
+def catch_docx():
+    
+    a = request.json['file']
+
+    # a.save(os.path.join('.',request.json['name']))
+    # for i in request.json['file']:
+    #     print(request.json['file']['name'])
+    return request.json['file']
+
+@app.route('/api/convert_docx', methods=['POST', 'GET'])
+def convertDocx():
+    if 'filename' in request.json:
+        convert_docx(request.json['source'], request.json['target'], request.json['filename'], request.json['nativize'],
+            request.json['preOptions'], request.json['postOptions'])
+        return
+    else:
+        text = 'file is not present'
+
+        text = text.replace('\n', '<br/>')
+
+        return text
+
+    
 
 @app.route('/api/convert', methods=['POST', 'GET'])
 def convert_post():

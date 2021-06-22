@@ -12,7 +12,7 @@
         <q-uploader url=""  hide-upload-button clearable extensions=".txt, .html, .htm, .xml, .json, .itx, .docx"
            stack-label="+ icon to add. You can add multiple files. <br/> .txt, .xml, .html, .itx, .docx, .json" auto-expand hide-upload-progress multiple ref="uploadF" :style="{width:'250px'}"/>
     </q-field>
-    <q-btn class="q-ma-md" color="dark" @click="convertDownload"> Convert & Download </q-btn>
+    <q-btn class="q-ma-md" color="dark" @click="fileExtention"> Convert & Download </q-btn>
     <q-btn class="q-ma-md" color="dark" @click="convertView"> Convert & View </q-btn>
     <q-btn class="q-ma-md" color="dark" @click="clear"> Clear Files </q-btn> <br/>
     <div class="q-body-1" v-show="downloadWarning"> <i>Your browser may try to block the downloads. In that case, please unblock and try again. </i></div>
@@ -21,11 +21,11 @@
     <div v-for="(file, index) in files" :key="'file'+index" v-if="showContent">
       <b> {{file.name}} </b> <br/><br/>
       <div v-for="script in options.outputScript" :key="script">
-        <div class="q-ma-md">{{getScriptObject(script).label}}</div>
+      <div class="q-ma-md">{{getScriptObject(script).label}}</div>
       <transliterate :text="sanitize(file.content)" :src="options.inputScript" :tgt="script" :sourcePreserve="options.sourcePreserve" :postOptions="options.postOptions[script]" :preOptions="options.preOptions"> </transliterate>
       <br/><br/>
-      </div>
     </div>
+   </div>
   </q-page>
 </template>
 
@@ -36,12 +36,16 @@
 </style>
 
 <script>
+import Vue from 'vue'
 import Transliterate from '../components/Transliterate'
 import ControlsIo from '../components/ControlsIo'
 import {QPageSticky, QUploader, QField, QSpinnerComment} from 'quasar'
 import { ScriptMixin } from '../mixins/ScriptMixin'
 import sanitizeHtml from 'sanitize-html'
 import { saveAs } from 'file-saver'
+import axios from 'axios'
+Vue.use(axios)
+// import { content } from 'html2canvas/dist/types/css/property-descriptors/content'
 
 var JSZip = require('jszip')
 
@@ -85,6 +89,9 @@ export default {
         this.showContent = true
       }
     },
+    // docx: async function (name) {
+    //   console.log(name)
+    // },
     readFiles: async function () {
       this.files = []
       for (var i = 0; i < this.$refs.uploadF.queue.length; i++) {
@@ -99,12 +106,14 @@ export default {
           text = await this.readFileText(file)
         }
         if (ext === 'docx') {
+          // this.docx(file.name)
           this.files.push({name: file.name, content: text[0], zip: text[1]})
         } else {
           this.files.push({name: file.name, content: text})
         }
       }
     },
+
     readDocX: function (contentZ) {
       return new Promise(resolve => {
         var newZip = new JSZip()
@@ -134,6 +143,39 @@ export default {
         }
         reader.readAsText(url)
       })
+    },
+    fileExtention: async function () {
+      this.files = []
+      if (this.$refs.uploadF.queue.length === 0) {
+        this.$q.notify({
+          message: 'Please select File for conversion',
+          position: 'center',
+          timeout: 1000
+        })
+      } else {
+        for (var i = 0; i < this.$refs.uploadF.queue.length; i++) {
+          var file = this.$refs.uploadF.queue[i]
+          var ext = file.name.split('.')[1]
+          // var text = ''
+          if (ext === 'docx') {
+            const fd = new FormData()
+            fd.append(file, file.name)
+            // axios.post('', fd)
+            var data = {
+              file: file,
+              name: file.name
+            }
+            // console.log(file)
+            // this.axios.post('file', '/catch_docx', fd, {
+            //   headers: {'content-type': 'multipart/form-data'}
+            // })
+            this.apiCall.post('/catch_docx', data)
+            this.convertDocx(file.name)
+          } else {
+            this.convertDownload()
+          }
+        }
+      }
     },
     convertDownload: async function () {
       if (typeof this.optionsRet.inputScript === 'undefined' || typeof this.optionsRet.outputScript === 'undefined' || this.optionsRet.inputScript === '' || this.optionsRet.outputScript === '') {
@@ -181,6 +223,31 @@ export default {
         this.loading = false
       }
     },
+
+    convertDocx: async function (FileName) {
+      if (typeof this.optionsRet.inputScript === 'undefined' || typeof this.optionsRet.outputScript === 'undefined' || this.optionsRet.inputScript === '' || this.optionsRet.outputScript === '') {
+        this.$q.notify({
+          message: 'Please select input/ouput scripts before proceeding to conversion',
+          position: 'center',
+          timeout: 1000
+        })
+      } else {
+        this.loading = true
+        this.downloadWarning = true
+        this.showContent = false
+        this.options = this.optionsRet
+        // await this.readFiles()
+        // console.log('working')
+        for (var j = 0; j < this.options.outputScript.length; j++) {
+          var outputScript = this.options.outputScript[j]
+          // for (var i = 0; i < this.files.length; i++) {
+          // var file = this.files[i]
+          await this.convert_Docx(this.options.inputScript, outputScript, FileName, this.options.sourcePreserve, this.options.postOptions[outputScript], this.options.preOptions)
+        }
+        this.loading = false
+      }
+    },
+
     convert: function () {
     },
     clear: function () {

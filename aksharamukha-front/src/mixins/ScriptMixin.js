@@ -2284,6 +2284,25 @@ export const ScriptMixin = {
           })
       })
     },
+    convert_Docx: function (src, tgt, filename, sourcePreserve, optionsPost, optionsPre) {
+      return new Promise(resolve => {
+        var data = {
+          source: src,
+          target: tgt,
+          filename: filename,
+          nativize: !sourcePreserve,
+          postOptions: optionsPost,
+          preOptions: optionsPre
+        }
+        this.apiCall.post('/convert_docx', data)
+          .then(function (response) {
+            resolve(response.data)
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      })
+    },
     convertLoopTgtAsync: function (src, tgts, txt, sourcePreserve, optionsPost, optionsPre) {
       return new Promise(resolve => {
         var data = {
