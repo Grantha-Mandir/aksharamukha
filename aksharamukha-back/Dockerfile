@@ -7,6 +7,7 @@ RUN pip3 install gunicorn
 
 # Copy python files
 ADD ./aksharamukha-back/ /usr/backend/
+ADD ./aksharamukha-python-package/aksharamukha /usr/backend/aksharamukha/
 
 # install requirements
 WORKDIR /usr/backend/

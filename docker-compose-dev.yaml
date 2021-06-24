@@ -19,6 +19,7 @@ services:
     image: aksharamukha-back
     volumes:
         - ./aksharamukha-back:/usr/backend/
+        - ./aksharamukha-python-package/aksharamukha:/usr/backend/aksharamukha/
     ports:
       - "8085:8085"
   fonts:
