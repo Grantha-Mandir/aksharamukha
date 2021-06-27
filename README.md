@@ -20,19 +20,24 @@ There is a docker configuration for both development (docker-compose-dev.yaml) a
 ### Development with Docker
 
 Set up the dev environment:
-`docker-compose -f docker-compose-dev.yaml up -d`
+
+`docker-compose -f docker-compose-dev.yaml up --build`
 
 Changes in the frontend are effective immediately. Just refresh the web page.
 
 To make changes in the backend effective:
 `docker container restart aksharamukha_back_1`
 
-
 After adding additional npm packages a build is necessary:
-`docker-compose build --no-cache`
+`docker-compose -f docker-compose-dev.yaml up --build`
 
-Then, start the development environment again:
-`docker-compose -f docker-compose-dev.yaml up -d`
+### Production with Docker
+
+```
+docker compose build
+docker compose up
+
+```
 
 ## Front End
 The front end is written using Quasar and Vue. Use _npm install_ to install all the dependencies and then use _quasar dev_ to start the front end. Also, please point the api to localhost at mixins/ScriptMixin.js.
