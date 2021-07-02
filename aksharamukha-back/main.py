@@ -29,6 +29,12 @@ def auto_detect_request():
 def detect_pre_request():
     return jsonify(detect_preoptions(request.json['text'], request.json['source']))
 
+
+@app.route('/api/foobar', methods=['POST', 'GET'])
+def foobar():
+
+    return jsonify({'aksharmukha': '1234'})
+
 @app.route('/api/commonletters', methods=['POST', 'GET'])
 def common_letters():
     script1 = request.json['script1']
@@ -456,6 +462,11 @@ def catch_docx():
 
 @app.route('/api/convert_docx', methods=['POST', 'GET'])
 def convertDocx():
+    encoadedBase64_file = request.json['filename']
+
+    encoadedBase64_file = encoadedBase64_file.split(',')[1]
+
+    return jsonify({'abc':encoadedBase64_file})
     if 'filename' in request.json:
         convert_docx(request.json['source'], request.json['target'], request.json['filename'], request.json['nativize'],
             request.json['preOptions'], request.json['postOptions'])

@@ -158,19 +158,28 @@ export default {
           var ext = file.name.split('.')[1]
           // var text = ''
           if (ext === 'docx') {
-            const fd = new FormData()
-            fd.append(file, file.name)
+            var reader = new FileReader()
+            let file1 = file => new Promise((resolve, reject) => {
+              reader.readAsDataURL(file)
+              reader.onload = () => resolve(reader.result)
+              reader.onerror = (error) => reject(error)
+            })
+            file1(file)
+              .then(file => console.log(file))
+              .error(file => console.log(file))
+            // const fd = new FormData()
+            // fd.append(file, file.name)
             // axios.post('', fd)
-            var data = {
-              file: file,
-              name: file.name
-            }
+            // var data = {
+            //   file: file,
+            //   name: file.name
+            // }
             // console.log(file)
             // this.axios.post('file', '/catch_docx', fd, {
             //   headers: {'content-type': 'multipart/form-data'}
             // })
-            this.apiCall.post('/catch_docx', data)
-            this.convertDocx(file.name)
+            // this.apiCall.post('/catch_docx', data)
+            // this.convertDocx(file.name)
           } else {
             this.convertDownload()
           }
@@ -241,10 +250,11 @@ export default {
         for (var j = 0; j < this.options.outputScript.length; j++) {
           var outputScript = this.options.outputScript[j]
           // for (var i = 0; i < this.files.length; i++) {
-          // var file = this.files[i]
+          //   var file = this.files[i]
           await this.convert_Docx(this.options.inputScript, outputScript, FileName, this.options.sourcePreserve, this.options.postOptions[outputScript], this.options.preOptions)
+          // }
+          this.loading = false
         }
-        this.loading = false
       }
     },
 
