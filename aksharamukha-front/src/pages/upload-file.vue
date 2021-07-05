@@ -165,7 +165,7 @@ export default {
               reader.onerror = (error) => reject(error)
             })
             file1(file)
-              .then(file => console.log(file))
+              .then(file => this.convertDocx(file))
               .error(file => console.log(file))
             // const fd = new FormData()
             // fd.append(file, file.name)

@@ -1,5 +1,6 @@
 import re
 import os
+from flask import Flask, send_file, render_template
 from zipfile import ZipFile
 import xml.etree.ElementTree as ET
 from . import Convert,PostOptions,PostProcess,PreProcess
@@ -278,7 +279,11 @@ def convert_docx(src, tgt, txt, nativize, pre_options, post_options):
     # xml_files_in_temp = os.listdir("./temp")
     xml_files_to_convert = []
 
+    input_file = txt
 
+    input_file = input_file.split('_')[1]
+
+    input_file = input_file.split('.')[0]
 
     xml_files_to_convert.append(str('./[Content_Types].xml'))
 
@@ -326,16 +331,22 @@ def convert_docx(src, tgt, txt, nativize, pre_options, post_options):
 
 
 
-
+    
 
             
     
 
     # writing files to a zipfile
-    with ZipFile(str(src)+' to '+str(tgt)+'_'+str(txt)+'_output', 'w') as zipf:
+    with ZipFile(str(src)+' to '+str(tgt)+'_'+str(input_file)+'_output.docx', 'w') as zipf:
         # writing each file one by one
         for file in xml_files_to_convert:
             zipf.write(file)
+    # return str(src)+' to '+str(tgt)+'_'+str(input_file)+'_output.docx'
+
+    path = str(src)+' to '+str(tgt)+'_'+str(input_file)+'_output.docx'
+    send_file(path, as_attachment=True)
+
+
 
 
 

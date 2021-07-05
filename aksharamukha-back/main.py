@@ -1,5 +1,7 @@
-from flask import Flask, jsonify, request, redirect
+from flask import Flask, jsonify, request, redirect, send_file
 from flask_cors import CORS
+from datetime import datetime
+from random import random
 import re
 from aksharamukha import Convert,PostOptions,PostProcess,PreProcess, GeneralMap
 import json
@@ -9,7 +11,9 @@ import itertools
 from collections import Counter
 import unicodedata
 import io
+import base64
 import shutil
+import os
 
 from aksharamukha.transliterate import convert, unique_everseen, removeA, auto_detect, detect_preoptions, convert_docx
 
@@ -33,7 +37,36 @@ def detect_pre_request():
 @app.route('/api/foobar', methods=['POST', 'GET'])
 def foobar():
 
-    return jsonify({'aksharmukha': '1234'})
+    encoadedBase64_file = request.json['filename']
+
+    encoadedBase64_file = encoadedBase64_file.split(',')[1]
+
+    decoded_file = base64.b64decode(encoadedBase64_file)
+
+    now = datetime.now()
+
+    current_time = str(now.strftime("%H:%M:%S"))
+
+    input_file_name = current_time + str(random()) + '_decodedFile.docx'
+    print("input_file_name =", input_file_name)
+
+    with open(input_file_name, 'wb+') as f:
+        f.write(decoded_file)
+    
+    convert_docx(request.json['source'], request.json['target'], input_file_name, request.json['nativize'],
+            request.json['preOptions'], request.json['postOptions'])
+
+    shutil.rmtree('word')
+    shutil.rmtree('_rels')
+    shutil.rmtree('docProps')
+    os.unlink(str(input_file_name))
+    os.unlink("[Content_Types].xml")
+
+    
+
+    return jsonify({'abc':encoadedBase64_file})
+
+    # return jsonify({'aksharmukha': '1234'})
 
 @app.route('/api/commonletters', methods=['POST', 'GET'])
 def common_letters():
@@ -462,15 +495,35 @@ def catch_docx():
 
 @app.route('/api/convert_docx', methods=['POST', 'GET'])
 def convertDocx():
+
     encoadedBase64_file = request.json['filename']
 
     encoadedBase64_file = encoadedBase64_file.split(',')[1]
 
-    return jsonify({'abc':encoadedBase64_file})
+    decoded_file = base64.b64decode(encoadedBase64_file)
+
+    now = datetime.now()
+
+    current_time = str(now.strftime("%H:%M:%S"))
+
+    input_file_name = current_time + str(random()) + '_decodedFile.docx'
+
+    # print("input_file_name =", input_file_name)
+
+    with open(input_file_name, 'wb+') as f:
+        f.write(decoded_file)
+    
     if 'filename' in request.json:
-        convert_docx(request.json['source'], request.json['target'], request.json['filename'], request.json['nativize'],
+        convert_docx(request.json['source'], request.json['target'],  input_file_name, request.json['nativize'],
             request.json['preOptions'], request.json['postOptions'])
-        return
+
+        shutil.rmtree('word')
+        shutil.rmtree('_rels')
+        shutil.rmtree('docProps')
+        os.unlink(str(input_file_name))
+        os.unlink("[Content_Types].xml")
+
+        return jsonify({'base64_encoadedFile':encoadedBase64_file})
     else:
         text = 'file is not present'
 
