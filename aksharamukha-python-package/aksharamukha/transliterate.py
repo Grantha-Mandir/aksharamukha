@@ -1,7 +1,7 @@
 import re
 import os
 from flask import Flask, send_file, render_template
-from zipfile import ZipFile
+from zipfile import ZipFile, ZIP_DEFLATED
 import xml.etree.ElementTree as ET
 from . import Convert,PostOptions,PostProcess,PreProcess
 from . import ConvertFix
@@ -266,88 +266,28 @@ def process(src, tgt, txt, nativize = True, post_options = [], pre_options = [])
 
     return convert(src, tgt, txt, nativize, pre_options, post_options)
 
-
 def convert_docx(src, tgt, txt, nativize, pre_options, post_options):
+    zip_buffer = io.BytesIO(txt)
 
-    # ZipFile(r'C:\Users\ubaid\PycharmProjects\test_roman_IAST_to_devanagari_input.docx').extractall(".")
-
-    ZipFile(txt).extractall(".")
-    xml_files_in_word = os.listdir("./word")
-    xml_files_in_word_rels = os.listdir("./word/_rels")
-    xml_files_in_rels = os.listdir("./_rels")
-    xml_files_in_docProps = os.listdir("./docProps")
-    # xml_files_in_temp = os.listdir("./temp")
-    xml_files_to_convert = []
-
-    input_file = txt
-
-    input_file = input_file.split('_')[1]
-
-    input_file = input_file.split('.')[0]
-
-    xml_files_to_convert.append(str('./[Content_Types].xml'))
-
-    for file in xml_files_in_rels:
-
-        file = "./_rels/" +str(file)
-        xml_files_to_convert.append(file)
-    
-    for file in xml_files_in_docProps:
-
-        file = "./docProps/" +str(file)
-        xml_files_to_convert.append(file)
-
-    for file in xml_files_in_word:
-        if file.endswith('.xml'):
-
-
-            file = "./word/" +str(file)
-            xml_files_to_convert.append(file)
-
-    for file in xml_files_in_word_rels:
-
-        file = "./word/_rels/" +str(file)
-        xml_files_to_convert.append(file)
-
-
-
-    
-
-
-    for file in xml_files_to_convert:
-
-        if "word" in file and file.endswith('.xml'):
-
-            tree = ET.parse(file)
-
-            root = tree.getroot()
-
-            for data in root.iter():
-                if data.text:
-                    data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
-    
-            tree.write(file)
-
-
-
-
-    
-
+    with ZipFile(zip_buffer, "a", ZIP_DEFLATED, False) as thezip:
+        infolist = []
+        for zipinfo in thezip.infolist():
+            infolist.append(zipinfo)
             
-    
+        for zipinfo in infolist:
+            if zipinfo.filename.startswith("word/") and zipinfo.filename.endswith(".xml"):
+                with thezip.open(zipinfo) as thefile:
+                    tree = ET.parse(thefile)
+                    root = tree.getroot()
 
-    # writing files to a zipfile
-    with ZipFile(str(src)+' to '+str(tgt)+'_'+str(input_file)+'_output.docx', 'w') as zipf:
-        # writing each file one by one
-        for file in xml_files_to_convert:
-            zipf.write(file)
-    # return str(src)+' to '+str(tgt)+'_'+str(input_file)+'_output.docx'
+                    for data in root.iter():
+                        if data.text:
+                            data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
+                    
+                    thezip.writestr(zipinfo.filename, ET.tostring(root).decode())
+                    thefile.close()
 
-    path = str(src)+' to '+str(tgt)+'_'+str(input_file)+'_output.docx'
-    send_file(path, as_attachment=True)
+        thezip.close()
 
-
-
-
-
-
+    output_txt = zip_buffer.getvalue()
+    return output_txt

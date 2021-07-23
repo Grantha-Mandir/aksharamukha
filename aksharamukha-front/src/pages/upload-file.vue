@@ -233,6 +233,31 @@ export default {
       }
     },
 
+    // convertDocx: async function (FileName) {
+    //   if (typeof this.optionsRet.inputScript === 'undefined' || typeof this.optionsRet.outputScript === 'undefined' || this.optionsRet.inputScript === '' || this.optionsRet.outputScript === '') {
+    //     this.$q.notify({
+    //       message: 'Please select input/ouput scripts before proceeding to conversion',
+    //       position: 'center',
+    //       timeout: 1000
+    //     })
+    //   } else {
+    //     this.loading = true
+    //     this.downloadWarning = true
+    //     this.showContent = false
+    //     this.options = this.optionsRet
+    //     // await this.readFiles()
+    //     // console.log('working')
+    //     for (var j = 0; j < this.options.outputScript.length; j++) {
+    //       var outputScript = this.options.outputScript[j]
+    //       // for (var i = 0; i < this.files.length; i++) {
+    //       //   var file = this.files[i]
+    //       await this.convert_Docx(this.options.inputScript, outputScript, FileName, this.options.sourcePreserve, this.options.postOptions[outputScript], this.options.preOptions)
+    //       // }
+    //       this.loading = false
+    //     }
+    //   }
+    // },
+
     convertDocx: async function (FileName) {
       if (typeof this.optionsRet.inputScript === 'undefined' || typeof this.optionsRet.outputScript === 'undefined' || this.optionsRet.inputScript === '' || this.optionsRet.outputScript === '') {
         this.$q.notify({
@@ -245,18 +270,87 @@ export default {
         this.downloadWarning = true
         this.showContent = false
         this.options = this.optionsRet
-        // await this.readFiles()
-        // console.log('working')
+        await this.readFiles()
         for (var j = 0; j < this.options.outputScript.length; j++) {
           var outputScript = this.options.outputScript[j]
-          // for (var i = 0; i < this.files.length; i++) {
-          //   var file = this.files[i]
-          await this.convert_Docx(this.options.inputScript, outputScript, FileName, this.options.sourcePreserve, this.options.postOptions[outputScript], this.options.preOptions)
-          // }
-          this.loading = false
+          for (var i = 0; i < this.files.length; i++) {
+            var file = this.files[i]
+            var content = await this.convert_Docx(this.options.inputScript, outputScript, FileName, this.options.sourcePreserve, this.options.postOptions[outputScript], this.options.preOptions)
+
+            content = content.replace(new RegExp('<br/>', 'g'), '\n')
+            // content = content.replace(new RegExp('e-Grantamil 7', 'g'), 'Noto Sans Tamil')
+            // content = content.replace(new RegExp('e-Grantamil', 'g'), 'Noto Sans Tamil')
+
+            var blob = ''
+            var downloadName = this.options.inputScript + '_' + outputScript + '_' + file.name
+            if (file.name.includes('.txt')) {
+              blob = new Blob([content], {type: 'text/plain;charset=utf-8'})
+              saveAs(blob, downloadName)
+            } else if (file.name.includes('.xml')) {
+              blob = new Blob([content], {type: 'text/xml;charset=utf-8'})
+              saveAs(blob, downloadName)
+            } else if (file.name.includes('.docx')) {
+              saveAs(content, downloadName)
+              // file.zip.file('word/document.xml', content)
+              // file.zip.generateAsync({type: 'blob'})
+              //  .then(function (blob) {
+              //    saveAs(blob, downloadName)
+              //  })
+            } else {
+              blob = new Blob([content], {type: 'plain/html;charset=utf-8'})
+              saveAs(blob, downloadName)
+            }
+          }
         }
+        this.loading = false
       }
     },
+    // convertDocx: async function (FileName) {
+    //   if (typeof this.optionsRet.inputScript === 'undefined' || typeof this.optionsRet.outputScript === 'undefined' || this.optionsRet.inputScript === '' || this.optionsRet.outputScript === '') {
+    //     this.$q.notify({
+    //       message: 'Please select input/ouput scripts before proceeding to conversion',
+    //       position: 'center',
+    //       timeout: 1000
+    //     })
+    //   } else {
+    //     this.loading = true
+    //     this.downloadWarning = true
+    //     this.showContent = false
+    //     this.options = this.optionsRet
+    //     await this.readFiles()
+    //     for (var j = 0; j < this.options.outputScript.length; j++) {
+    //       var outputScript = this.options.outputScript[j]
+    //       for (var i = 0; i < this.files.length; i++) {
+    //         var file = this.files[i]
+    //         var content = await this.convert_Docx(this.options.inputScript, outputScript, FileName, this.options.sourcePreserve, this.options.postOptions[outputScript], this.options.preOptions)
+
+    //         content = content.replace(new RegExp('<br/>', 'g'), '\n')
+    //         // content = content.replace(new RegExp('e-Grantamil 7', 'g'), 'Noto Sans Tamil')
+    //         // content = content.replace(new RegExp('e-Grantamil', 'g'), 'Noto Sans Tamil')
+
+    //         var blob = ''
+    //         var downloadName = this.options.inputScript + '_' + outputScript + '_' + file.name
+    //         if (file.name.includes('.txt')) {
+    //           blob = new Blob([content], {type: 'text/plain;charset=utf-8'})
+    //           saveAs(blob, downloadName)
+    //         } else if (file.name.includes('.xml')) {
+    //           blob = new Blob([content], {type: 'text/xml;charset=utf-8'})
+    //           saveAs(blob, downloadName)
+    //         } else if (file.name.includes('.docx')) {
+    //           file.zip.file('word/document.xml', content)
+    //           file.zip.generateAsync({type: 'blob'})
+    //             .then(function (blob) {
+    //               saveAs(blob, downloadName)
+    //             })
+    //         } else {
+    //           blob = new Blob([content], {type: 'plain/html;charset=utf-8'})
+    //           saveAs(blob, downloadName)
+    //         }
+    //       }
+    //     }
+    //     this.loading = false
+    //   }
+    // },
 
     convert: function () {
     },
