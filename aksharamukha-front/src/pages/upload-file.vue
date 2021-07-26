@@ -293,9 +293,9 @@ export default {
               saveAs(content, downloadName)
               // file.zip.file('word/document.xml', content)
               // file.zip.generateAsync({type: 'blob'})
-              //  .then(function (blob) {
-              //    saveAs(blob, downloadName)
-              //  })
+              //   .then(function (blob) {
+              //     saveAs(blob, downloadName)
+              //   })
             } else {
               blob = new Blob([content], {type: 'plain/html;charset=utf-8'})
               saveAs(blob, downloadName)

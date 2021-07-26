@@ -266,28 +266,91 @@ def process(src, tgt, txt, nativize = True, post_options = [], pre_options = [])
 
     return convert(src, tgt, txt, nativize, pre_options, post_options)
 
-def convert_docx(src, tgt, txt, nativize, pre_options, post_options):
-    zip_buffer = io.BytesIO(txt)
-
-    with ZipFile(zip_buffer, "a", ZIP_DEFLATED, False) as thezip:
-        infolist = []
+def download_extract_zip(txt):
+    
+    # response = requests.get(url)
+    with ZipFile(io.BytesIO(txt)) as thezip:
         for zipinfo in thezip.infolist():
-            infolist.append(zipinfo)
-            
-        for zipinfo in infolist:
-            if zipinfo.filename.startswith("word/") and zipinfo.filename.endswith(".xml"):
-                with thezip.open(zipinfo) as thefile:
-                    tree = ET.parse(thefile)
-                    root = tree.getroot()
+            with thezip.open(zipinfo) as thefile:
+                yield zipinfo.filename
 
-                    for data in root.iter():
-                        if data.text:
-                            data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
+
+def convert_docx(src, tgt, txt, nativize, pre_options, post_options):
+
+    
+
+    # xml_files_to_convert = []
+
+    zip_buffer_input = io.BytesIO(txt)
+    zip_buffer_output = io.BytesIO()
+
+    # zip_buffer = io.BytesIO(txt)
+
+    with ZipFile(zip_buffer_output, "w", ZIP_DEFLATED, False) as output_zip:
+
+        with ZipFile(zip_buffer_input, "r", ZIP_DEFLATED, False) as input_zip:
+
+            infolist = []
+            for zipinfo in input_zip.infolist():
+                infolist.append(zipinfo)
+
+            for zipinfo in infolist:
+                if zipinfo.filename.startswith("word/") and zipinfo.filename.endswith(".xml"):
                     
-                    thezip.writestr(zipinfo.filename, ET.tostring(root).decode())
-                    thefile.close()
+                    with input_zip.open(zipinfo) as thefile:
+                        
+                        # r = ET.fromstring('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>')
+                        # r = ET.fromstring('''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>''').getroottree()
+                        tree = ET.parse(thefile)
+                        root = tree.getroot()
 
-        thezip.close()
+                        # ET.register_namespace('','1.0')
+                        # r = ET.fromstring('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>')
+                        
+                        # pretty_print = True, xml_declaration = True, encoding='UTF-8'
+                        for data in root.iter():
+                            
+                            if data.text:
+                                data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
 
-    output_txt = zip_buffer.getvalue()
+                        
+                        output_zip.writestr(zipinfo.filename, ET.tostring(root, encoding='iso-8859-1'))
+                        
+                else:
+                    with input_zip.open(zipinfo) as thefile:
+                        output_zip.writestr(zipinfo.filename, thefile.read())
+
+    output_txt = zip_buffer_output.getvalue()
     return output_txt
+
+    
+    # with ZipFile(zip_buffer, "a", ZIP_DEFLATED, False) as thezip:
+
+    #         for zipinfo in thezip.infolist():
+    #             xml_files_to_convert.append(zipinfo)
+            
+    #         for file in xml_files_to_convert:
+    #             if file.filename.startswith('word') and file.filename.endswith('.xml'):
+    #                 with thezip.open(file) as thefile:
+    #                     tree = ET.parse(thefile)
+
+    #                     root = tree.getroot()
+
+    #                     for data in root.iter():
+    #                         if data.text:
+    #                             data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
+                        
+    #                     thezip.writestr(file.filename, ET.tostring(root).decode())
+    #                     thefile.close()
+
+    #         thezip.close()
+
+    # out = zip_buffer.getvalue()
+
+    # return out
+
+
+
+
+
+
