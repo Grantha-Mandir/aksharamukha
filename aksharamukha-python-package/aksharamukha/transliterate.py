@@ -3,6 +3,8 @@ import os
 from flask import Flask, send_file, render_template
 from zipfile import ZipFile, ZIP_DEFLATED
 import xml.etree.ElementTree as ET
+# from lxml import etree
+# import lxml.etree
 from . import Convert,PostOptions,PostProcess,PreProcess
 from . import ConvertFix
 import requests
@@ -304,8 +306,14 @@ def convert_docx(src, tgt, txt, nativize, pre_options, post_options):
                             if data.text:
                                 data.text = convert(src, tgt, data.text, nativize, post_options, pre_options)
 
+                        # f = io.BytesIO(root)
                         
-                        output_zip.writestr(zipinfo.filename, ET.tostring(root, encoding='iso-8859-1'))
+                        # output_zip.writestr(zipinfo.filename, ET.tostring(root).decode())
+                        # output_zip.writestr(zipinfo.filename, ET.tostring(root,encoding='iso-8859-1').decode())
+                        # output_zip.writestr(zipinfo.filename, f, encoding='utf-8', xml_declaration=True).decode())
+                        # xml = tostring(document, encoding='utf-8', declaration=xdec)
+                        output_zip.writestr(zipinfo.filename, ET.tostring(root, encoding='utf8', method='xml'))
+                        # output_zip.writestr(zipinfo.filename, ET.tostring(root, encoding='utf8', declaration=xdec))
                         
 
                     
